@@ -189,7 +189,6 @@ if not df3.empty:
 
 else:
     st.warning("Sin datos disponibles")
-# -------- SECCIÓN 4 --------
 st.header("Velocidad Promedio por Segmento")
 
 if not df4.empty:
@@ -197,29 +196,16 @@ if not df4.empty:
 
     if {"velocidad_bajada", "velocidad_subida"}.issubset(df4.columns):
 
-        col_segmento = df4.columns[1]
-
-        df4_long = df4.melt(
-            id_vars=[col_segmento],
-            value_vars=["velocidad_bajada", "velocidad_subida"],
-            var_name="tipo",
-            value_name="velocidad"
-        )
+        col_segmento = "segmento"  # usa el nombre real
 
         fig4 = px.bar(
-            df4_long,
+            df4,
             x=col_segmento,
-            y="velocidad",
-            color="tipo",
+            y=["velocidad_bajada", "velocidad_subida"],
             barmode="group",
-            text="velocidad",
-            title="Velocidad Promedio de Bajada vs Subida por Segmento",
-            color_discrete_sequence=px.colors.sequential.Blues_r
-        )
-
-        fig4.update_traces(
-            texttemplate='%{text:.1f}',
-            textposition='outside'
+            color=col_segmento,  # ← cada segmento un color
+            text_auto=".1f",
+            title="Velocidad Promedio de Bajada y Subida por Segmento"
         )
 
         fig4.update_layout(
@@ -227,8 +213,7 @@ if not df4.empty:
             height=560,
             xaxis_title="Segmento",
             yaxis_title="Velocidad (Mbps)",
-            legend_title="Tipo de Velocidad",
-            xaxis_tickangle=-20,
+            legend_title="Segmento",
             bargap=0.25
         )
 
