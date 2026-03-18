@@ -1,118 +1,127 @@
-# dashboard.py
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 import os
 
-# --- 1. CONFIGURACIÓN DE LA PÁGINA ---
+# -------------------------------------------------
+# CONFIGURACIÓN GENERAL
+# -------------------------------------------------
 st.set_page_config(
-    page_title="Conectividad Digital - Región Paisa",
-    page_icon="🌐",
+    page_title="Conectividad Digital Colombia",
+    page_icon="📡",
     layout="wide"
 )
 
-# --- 2. CARGA DE DATOS LOCALES ---
+# -------------------------------------------------
+# FUNCIONES
+# -------------------------------------------------
 @st.cache_data(ttl=3600)
 def load_data():
-    data_path = "data/"  # Carpeta donde estarán los CSV
+    data_path = "data/"  # carpeta donde estarán los CSV en el repo
     try:
-        df1 = pd.read_csv(os.path.join(data_path, "q1_departamentos.csv"))
-        df2 = pd.read_csv(os.path.join(data_path, "q2_municipios.csv"))
-        df3 = pd.read_csv(os.path.join(data_path, "q3_tecnologia.csv"))
-        df4 = pd.read_csv(os.path.join(data_path, "q4_velocidades.csv"))
-        df5 = pd.read_csv(os.path.join(data_path, "q5_proveedores.csv"))
+        def clean_cols(df):
+            df.columns = (
+                df.columns
+                .str.strip()
+                .str.lower()
+                .str.replace(" ", "_")
+                .str.replace("ñ", "n")
+            )
+            return df
+
+        df1 = clean_cols(pd.read_csv(os.path.join(data_path, "q1_departamentos.csv")))
+        df2 = clean_cols(pd.read_csv(os.path.join(data_path, "q2_municipios.csv")))
+        df3 = clean_cols(pd.read_csv(os.path.join(data_path, "q3_tecnologia.csv")))
+        df4 = clean_cols(pd.read_csv(os.path.join(data_path, "q4_velocidades.csv")))
+        df5 = clean_cols(pd.read_csv(os.path.join(data_path, "q5_proveedores.csv")))
         return df1, df2, df3, df4, df5
     except Exception as e:
-        st.error(f"Error al cargar los CSV: {e}")
+        st.error(f"Error al cargar CSV: {e}")
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
+
+# -------------------------------------------------
+# CARGA
+# -------------------------------------------------
 df1, df2, df3, df4, df5 = load_data()
 
-# --- 3. GESTIÓN DE VISTAS ---
-if 'view' not in st.session_state:
-    st.session_state.view = 'home'
+# -------------------------------------------------
+# SIDEBAR
+# -------------------------------------------------
+st.sidebar.title("Panel de Control")
+st.sidebar.markdown("Proyecto de Analítica de Datos")
 
-# --- VISTA: INICIO ---
-if st.session_state.view == 'home':
-    st.title("🚀 Dashboard de Conectividad Digital")
-    st.subheader("Proyecto Analítico - Región Paisa / Colombia")
-    
-    portada = "data/internet-que-es-portada-890x445-1.jpg"
-    if os.path.exists(portada):
-        st.image(portada, use_container_width=True, caption="Transformación Digital")
-    else:
-        st.image("https://www.cursosaula21.com/wp-content/uploads/2021/03/internet-que-es-portada-890x445-1.jpg", use_container_width=True)
-    
-    if st.button("📊 Entrar al Dashboard", use_container_width=True):
-        st.session_state.view = 'dashboard'
-        st.rerun()
-
-# --- VISTA: DASHBOARD ---
+if not df1.empty and "anio" in df1.columns:
+    anio_opciones = sorted(df1["anio"].dropna().unique())
+    anio_sel = st.sidebar.selectbox("Seleccionar Año", anio_opciones)
+    df1 = df1[df1["anio"] == anio_sel]
 else:
-    st.sidebar.header("Panel de Control")
-    if st.sidebar.button("🏠 Volver al Inicio"):
-        st.session_state.view = 'home'
-        st.rerun()
+    st.sidebar.warning("No se encontró columna 'anio'")
 
-    st.title("📊 Dashboard Interactivo - Conectividad Digital")
+# -------------------------------------------------
+# DASHBOARD
+# -------------------------------------------------
+st.title("📡 Dashboard de Conectividad Digital")
+st.markdown("Análisis de accesos a Internet por regiones, tecnologías y proveedores")
 
-    # --- FILTROS GLOBALES ---
-    año_opciones = sorted(df1["anio"].dropna().unique()) if not df1.empty else []
-    año_sel = st.sidebar.selectbox("Filtrar por Año:", año_opciones, index=0)
+# -------- SECCIÓN 1 --------
+st.header("Accesos por Departamento")
+if not df1.empty:
+    st.dataframe(df1, use_container_width=True)
+    if len(df1.columns) >= 2:
+        fig1 = px.bar(df1, x=df1.columns[1], y="accesos", title="Accesos por Departamento")
+        st.plotly_chart(fig1, use_container_width=True)
+else:
+    st.warning("Sin datos disponibles")
 
-    deptos_opciones = sorted(df1[df1["anio"]==año_sel][df1.columns[1]].unique()) if not df1.empty else []
-    depto_sel = st.sidebar.multiselect("Filtrar por Departamento:", deptos_opciones, default=deptos_opciones)
+# -------- SECCIÓN 2 --------
+st.header("Top Municipios con Más Accesos")
+if not df2.empty:
+    st.dataframe(df2, use_container_width=True)
+    if len(df2.columns) >= 2:
+        fig2 = px.bar(df2.head(10), x="accesos", y=df2.columns[1], orientation='h', title="Top Municipios")
+        st.plotly_chart(fig2, use_container_width=True)
+else:
+    st.warning("Sin datos disponibles")
 
-    tab1, tab2 = st.tabs(["📈 Visualización", "📋 Datos y Descarga"])
+# -------- SECCIÓN 3 --------
+st.header("Distribución por Tecnología")
+if not df3.empty:
+    st.dataframe(df3, use_container_width=True)
+    if len(df3.columns) >= 2:
+        fig3 = px.pie(df3, names=df3.columns[1], values="accesos", title="Participación por Tecnología")
+        st.plotly_chart(fig3, use_container_width=True)
+else:
+    st.warning("Sin datos disponibles")
 
-    with tab1:
-        col1, col2 = st.columns(2)
+# -------- SECCIÓN 4 --------
+st.header("Velocidad Promedio por Segmento")
+if not df4.empty:
+    st.dataframe(df4, use_container_width=True)
+    if {"velocidad_bajada", "velocidad_subida"}.issubset(df4.columns):
+        fig4 = px.bar(
+            df4,
+            x=df4.columns[1],
+            y=["velocidad_bajada", "velocidad_subida"],
+            barmode="group",
+            title="Velocidades Promedio"
+        )
+        st.plotly_chart(fig4, use_container_width=True)
+else:
+    st.warning("Sin datos disponibles")
 
-        # --- Gráfico Departamentos ---
-        with col1:
-            if not df1.empty:
-                df_dep = df1[df1[df1.columns[1]].isin(depto_sel) & (df1["anio"]==año_sel)]
-                fig_dep = px.bar(df_dep, x=df_dep.columns[1], y="accesos", title="Accesos por Departamento")
-                st.plotly_chart(fig_dep, use_container_width=True)
+# -------- SECCIÓN 5 --------
+st.header("Proveedores con Más Accesos")
+if not df5.empty:
+    st.dataframe(df5, use_container_width=True)
+    if len(df5.columns) >= 2:
+        fig5 = px.bar(df5.head(10), x=df5.columns[1], y="accesos", title="Top Proveedores")
+        st.plotly_chart(fig5, use_container_width=True)
+else:
+    st.warning("Sin datos disponibles")
 
-        # --- Top Municipios ---
-        with col2:
-            if not df2.empty:
-                df_mun = df2[df2[df2.columns[1]].isin(depto_sel) & (df2["anio"]==año_sel)]
-                top_munis = df_mun.sort_values("accesos", ascending=False).head(10)
-                fig_munis = px.bar(top_munis, x="accesos", y=top_munis.columns[1], orientation='h', title="Top 10 Municipios")
-                st.plotly_chart(fig_munis, use_container_width=True)
-
-        # --- Accesos por Tecnología ---
-        if not df3.empty:
-            df_tec = df3[df3["anio"]==año_sel]
-            fig_tec = px.pie(df_tec, values="accesos", names=df_tec.columns[1], title="Accesos por Tecnología", hole=0.3)
-            st.plotly_chart(fig_tec, use_container_width=True)
-
-        # --- Velocidad promedio por segmento ---
-        if not df4.empty:
-            df_vel = df4[df4["anio"]==año_sel]
-            fig_vel = px.bar(df_vel, x=df_vel.columns[1], y="VELOCIDAD_BAJADA", title="Velocidad Promedio por Segmento (Bajada)")
-            st.plotly_chart(fig_vel, use_container_width=True)
-
-        # --- Proveedores sobre promedio ---
-        if not df5.empty:
-            df_prov = df5[df5["anio"]==año_sel]
-            fig_prov = px.bar(df_prov, x=df_prov.columns[1], y="accesos", title="Proveedores sobre Promedio Global")
-            st.plotly_chart(fig_prov, use_container_width=True)
-
-    with tab2:
-        st.write("### Tablas de Datos")
-        for i, df in enumerate([df1, df2, df3, df4, df5], start=1):
-            if not df.empty:
-                st.write(f"#### Dataset Q{i}")
-                st.dataframe(df, use_container_width=True)
-                csv = df.to_csv(index=False).encode('utf-8')
-                st.download_button(
-                    label=f"📥 Descargar Q{i} como CSV",
-                    data=csv,
-                    file_name=f'q{i}.csv',
-                    mime='text/csv'
-                )
-
-st.markdown("<br><hr><center style='color:gray'>Proyecto Analítico - Región Paisa 2026</center>", unsafe_allow_html=True)
+# -------------------------------------------------
+# PIE
+# -------------------------------------------------
+st.markdown("---")
+st.caption("Proyecto de Análisis de Datos — Conectividad Digital en Colombia")
