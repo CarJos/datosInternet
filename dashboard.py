@@ -174,15 +174,15 @@ if not df3.empty:
 
         # Mostrar SOLO nombre + porcentaje
         fig3.update_traces(
-            textinfo='label+percent',
+            textinfo='percent',
             textposition='inside',
-            insidetextorientation='horizontal'
+            hovertemplate='<b>%{label}</b><br>Participación: %{percent}<extra></extra>'
         )
 
         fig3.update_layout(
             title_x=0.5,
             height=620,
-            legend_title="Tecnología"
+            legend_title="tecnologia"
         )
 
         st.plotly_chart(fig3, use_container_width=True)
