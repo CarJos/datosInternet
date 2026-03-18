@@ -79,14 +79,37 @@ st.markdown("Análisis de accesos a Internet por regiones, tecnologías y provee
 
 # -------- SECCIÓN 1 --------
 st.header("Accesos por Departamento")
+
 if not df1.empty:
     st.dataframe(df1, use_container_width=True)
-    if len(df1.columns) >= 2:
-        fig1 = px.bar(df1, x="departamento", y="accesos", title="Accesos por Departamento")
+
+    if {"departamento", "accesos"}.issubset(df1.columns):
+
+        df1_sorted = df1.sort_values("accesos", ascending=False)
+
+        fig1 = px.pie(
+            df1_sorted,
+            names="departamento",
+            values="accesos",
+            title="Participación de Accesos por Departamento",
+            color_discrete_sequence=px.colors.sequential.Blues_r
+        )
+
+        fig1.update_traces(
+            texttemplate='%{label}<br>%{percent}',
+            textposition='inside'
+        )
+
+        fig1.update_layout(
+            title_x=0.5,
+            height=520,
+            legend_title="Departamento"
+        )
+
         st.plotly_chart(fig1, use_container_width=True)
+
 else:
     st.warning("Sin datos disponibles")
-
 # -------- SECCIÓN 2 --------
 st.header("Top Municipios con Más Accesos")
 
@@ -138,32 +161,31 @@ if not df3.empty:
     st.dataframe(df3, use_container_width=True)
 
     if {"accesos"}.issubset(df3.columns):
-        
+
         col_tec = df3.columns[1]
         df3_sorted = df3.sort_values("accesos", ascending=False)
 
-        fig3 = px.pie(
+        fig3 = px.bar(
             df3_sorted,
-            names=col_tec,
-            values="accesos",
-            title="Participación por Tecnología",
-            color_discrete_sequence=px.colors.sequential.Blues_r
+            x=col_tec,
+            y="accesos",
+            text="accesos",
+            title="Accesos por Tecnología",
+            color="accesos",
+            color_continuous_scale="Blues"
         )
 
         fig3.update_traces(
-            texttemplate='%{label}<br>%{value:,.0f}',
-            textposition='inside'
+            texttemplate='%{text:,.0f}',
+            textposition='outside'
         )
 
         fig3.update_layout(
             title_x=0.5,
             height=520,
-            legend_title="Tecnología",
-            legend=dict(
-                orientation="v",
-                yanchor="middle",
-                y=0.5
-            )
+            xaxis_title="Tecnología",
+            yaxis_title="Número de accesos",
+            xaxis_tickangle=-30
         )
 
         st.plotly_chart(fig3, use_container_width=True)
