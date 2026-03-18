@@ -133,11 +133,45 @@ else:
     
 # -------- SECCIÓN 3 --------
 st.header("Distribución por Tecnología")
+
 if not df3.empty:
     st.dataframe(df3, use_container_width=True)
-    if len(df3.columns) >= 2:
-        fig3 = px.pie(df3, names=df3.columns[1], values="accesos", title="Participación por Tecnología")
+
+    if {"accesos"}.issubset(df3.columns):
+        
+        # Detectar columna de tecnología (segunda columna)
+        col_tec = df3.columns[1]
+
+        # Ordenar de mayor a menor
+        df3_sorted = df3.sort_values("accesos", ascending=False)
+
+        fig3 = px.pie(
+            df3_sorted,
+            names=col_tec,
+            values="accesos",
+            title="Participación por Tecnología",
+            color="accesos",
+            color_continuous_scale="Blues"
+        )
+
+        fig3.update_traces(
+            texttemplate='%{label}<br>%{value:,.0f}',
+            textposition='inside'
+        )
+
+        fig3.update_layout(
+            title_x=0.5,
+            height=520,
+            legend_title="Tecnología",
+            legend=dict(
+                orientation="v",
+                yanchor="middle",
+                y=0.5
+            )
+        )
+
         st.plotly_chart(fig3, use_container_width=True)
+
 else:
     st.warning("Sin datos disponibles")
 
