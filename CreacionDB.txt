@@ -1,0 +1,104 @@
+CREATE DATABASE internet_fijo;
+USE internet_fijo;
+CREATE TABLE departamentos (
+    id_departamento INT PRIMARY KEY,
+    nombre_departamento VARCHAR(100) NOT NULL
+);
+CREATE TABLE municipios (
+    id_municipio INT PRIMARY KEY,
+    nombre_municipio VARCHAR(120) NOT NULL,
+    id_departamento INT NOT NULL,
+    
+    FOREIGN KEY (id_departamento) 
+    REFERENCES departamentos(id_departamento)
+);
+CREATE TABLE proveedores (
+    id_proveedor INT PRIMARY KEY AUTO_INCREMENT,
+    nombre_proveedor VARCHAR(150) NOT NULL
+);
+CREATE TABLE tecnologias (
+    id_tecnologia INT PRIMARY KEY AUTO_INCREMENT,
+    nombre_tecnologia VARCHAR(100) NOT NULL
+);
+CREATE TABLE segmentos (
+    id_segmento INT PRIMARY KEY AUTO_INCREMENT,
+    nombre_segmento VARCHAR(100) NOT NULL
+);
+CREATE TABLE principal_accesos (
+    id_acceso BIGINT PRIMARY KEY AUTO_INCREMENT,
+
+    anio INT NOT NULL,
+    trimestre INT NOT NULL,
+	id_departamento INT NOT NULL,
+    id_municipio INT NOT NULL,
+    id_proveedor INT NOT NULL,
+    id_tecnologia INT NOT NULL,
+    id_segmento INT NOT NULL,
+
+    velocidad_bajada INT,
+    velocidad_subida INT,
+
+    accesos INT NOT NULL,
+    
+	FOREIGN KEY (id_departamento) REFERENCES departamentos(id_departamento),
+    FOREIGN KEY (id_municipio) REFERENCES municipios(id_municipio),
+    FOREIGN KEY (id_proveedor) REFERENCES proveedores(id_proveedor),
+    FOREIGN KEY (id_tecnologia) REFERENCES tecnologias(id_tecnologia),
+    FOREIGN KEY (id_segmento) REFERENCES segmentos(id_segmento)
+);
+
+
+
+
+SELECT 
+    d.nombre_departamento,
+    SUM(a.accesos) AS total_accesos
+FROM accesos_internet a
+JOIN municipios m  ON a.id_municipio = m.id_municipio
+JOIN departamentos d ON m.id_departamento = d.id_departamento
+WHERE a.accesos > 0
+GROUP BY d.nombre_departamento
+ORDER BY total_accesos DESC;
+SELECT 
+    m.nombre_municipio,
+    d.nombre_departamento,
+    SUM(a.accesos) AS total_accesos
+FROM accesos_internet a
+JOIN municipios m ON a.id_municipio = m.id_municipio
+JOIN departamentos d ON m.id_departamento = d.id_departamento
+WHERE a.accesos IS NOT NULL
+GROUP BY m.nombre_municipio, d.nombre_departamento
+ORDER BY total_accesos DESC
+LIMIT 10;
+SELECT 
+    t.nombre_tecnologia,
+    SUM(a.accesos) AS total_accesos
+FROM accesos_internet a
+JOIN tecnologias t ON a.id_tecnologia = t.id_tecnologia
+WHERE a.anio >= 2020
+GROUP BY t.nombre_tecnologia
+ORDER BY total_accesos DESC;
+SELECT 
+    s.nombre_segmento,
+    ROUND(AVG(a.velocidad_bajada),0) AS promedio_bajada,
+    ROUND(AVG(a.velocidad_subida),0) AS promedio_subida
+FROM accesos_internet a
+JOIN segmentos s ON a.id_segmento = s.id_segmento
+WHERE a.velocidad_bajada > 0
+GROUP BY s.nombre_segmento
+ORDER BY promedio_bajada DESC;
+SELECT 
+    p.nombre_proveedor,
+    SUM(a.accesos) AS total_accesos
+FROM accesos_internet a
+JOIN proveedores p ON a.id_proveedor = p.id_proveedor
+GROUP BY p.nombre_proveedor
+HAVING total_accesos > (
+    SELECT AVG(total_prov)
+    FROM (
+        SELECT SUM(accesos) AS total_prov
+        FROM accesos_internet
+        GROUP BY id_proveedor
+    ) AS sub
+)
+ORDER BY total_accesos DESC;
