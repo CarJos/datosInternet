@@ -161,24 +161,34 @@ if not df3.empty:
     if {"accesos"}.issubset(df3.columns):
 
         col_tec = df3.columns[1]
-        df3_sorted = df3.sort_values("accesos", ascending=False)
+
+        df3_sorted = (
+            df3[[col_tec, "accesos"]]
+            .dropna()
+            .sort_values("accesos", ascending=False)
+        )
+
+        # Forzar texto categórico para leyenda correcta
+        df3_sorted[col_tec] = df3_sorted[col_tec].astype(str)
 
         fig3 = px.pie(
             df3_sorted,
-            names=col_tec,          # ← tecnología
+            names=col_tec,      # ← tecnología en leyenda
             values="accesos",
             hole=0.55,
             title="Participación de Accesos por Tecnología",
             color_discrete_sequence=px.colors.sequential.Blues_r
         )
 
-        # Mostrar SOLO nombre + porcentaje
-        fig3.update_traces(textinfo='percent')
+        fig3.update_traces(
+            textinfo='percent',
+            textposition='inside'
+        )
 
         fig3.update_layout(
             title_x=0.5,
             height=620,
-            legend_title="Tecnología"
+            legend_title_text="Tecnología"
         )
 
         st.plotly_chart(fig3, use_container_width=True)
