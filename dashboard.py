@@ -163,24 +163,27 @@ if not df3.empty:
         col_tec = df3.columns[1]
         df3_sorted = df3.sort_values("accesos", ascending=False)
 
-        fig3 = px.treemap(
+        fig3 = px.pie(
             df3_sorted,
-            path=[col_tec],
+            names=col_tec,
             values="accesos",
-            color="accesos",
-            color_continuous_scale="Blues",
-            title="Distribución de Accesos por Tecnología"
+            hole=0.55,
+            title="Participación de Accesos por Tecnología",
+            color_discrete_sequence=px.colors.sequential.Blues_r
         )
 
         fig3.update_traces(
-            texttemplate='<b>%{label}</b><br>%{value:,.0f} accesos',
-            textposition="middle center"
+            texttemplate='<b>%{label}</b><br>%{percent}',
+            textposition='inside',
+            insidetextorientation='horizontal'
         )
 
         fig3.update_layout(
             title_x=0.5,
             height=620,
-            margin=dict(t=60, l=20, r=20, b=20)
+            legend_title="Tecnología",
+            uniformtext_minsize=10,
+            uniformtext_mode='hide'
         )
 
         st.plotly_chart(fig3, use_container_width=True)
