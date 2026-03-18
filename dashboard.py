@@ -160,7 +160,7 @@ if not df3.empty:
 
     if {"accesos"}.issubset(df3.columns):
 
-        col_tec = df3.columns[1]
+        col_tec = "tecnologia"
         df3_sorted = df3.sort_values("accesos", ascending=False)
 
         fig3 = px.pie(
