@@ -153,7 +153,7 @@ else:
     st.warning("Sin datos disponibles")
     
 # -------- SECCIÓN 3 --------
-st.header("Distribución por Tecnología")
+st.header("Distribución por Tecnología (Treemap)")
 
 if not df3.empty:
     st.dataframe(df3, use_container_width=True)
@@ -161,34 +161,24 @@ if not df3.empty:
     if {"accesos"}.issubset(df3.columns):
 
         col_tec = df3.columns[1]
-        df3_sorted = df3.sort_values("accesos", ascending=True)
+        df3_sorted = df3.sort_values("accesos", ascending=False)
 
-        fig3 = px.bar(
+        fig3a = px.treemap(
             df3_sorted,
-            y=col_tec,
-            x="accesos",
-            orientation="h",
-            text="accesos",
-            title="Accesos por Tecnología",
+            path=[col_tec],
+            values="accesos",
             color="accesos",
-            color_continuous_scale="Blues"
+            color_continuous_scale="Blues",
+            title="Distribución de Accesos por Tecnología"
         )
 
-        fig3.update_traces(
-            texttemplate='%{text:,.0f}',
-            textposition='outside'
-        )
-
-        fig3.update_layout(
+        fig3a.update_layout(
             title_x=0.5,
-            height=600,
-            yaxis_title="Tecnología",
-            xaxis_title="Número de accesos",
-            bargap=0.2,
-            margin=dict(l=120, r=40, t=60, b=60)
+            height=620,
+            margin=dict(t=60, l=20, r=20, b=20)
         )
 
-        st.plotly_chart(fig3, use_container_width=True)
+        st.plotly_chart(fig3a, use_container_width=True)
 
 else:
     st.warning("Sin datos disponibles")
