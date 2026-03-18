@@ -11,7 +11,8 @@ st.set_page_config(
     page_icon="📡",
     layout="wide"
 )
-
+COLOR_PRINCIPAL = "#00C49A"
+TEMPLATE = "plotly_dark"
 # -------------------------------------------------
 # FUNCIONES
 # -------------------------------------------------
