@@ -158,36 +158,34 @@ st.header("Distribución por Tecnología")
 if not df3.empty:
     st.dataframe(df3, use_container_width=True)
 
-    # Tomar columnas por posición (más seguro)
-    col_tec = df3.columns[1]
-    col_acc = df3.columns[df3.columns.str.contains("accesos")][0]
+    if {"accesos"}.issubset(df3.columns):
 
-    df3_clean = df3[[col_tec, col_acc]].dropna().copy()
-    df3_clean[col_tec] = df3_clean[col_tec].astype(str)
+        col_tec = df3.columns[1]
+        df3_sorted = df3.sort_values("accesos", ascending=False)
 
-    df3_sorted = df3_clean.sort_values(by=col_acc, ascending=False)
+        fig3 = px.pie(
+            df3_sorted,
+            names=col_tec,          # ← tecnología
+            values="accesos",
+            hole=0.55,
+            title="Participación de Accesos por Tecnología",
+            color_discrete_sequence=px.colors.sequential.Blues_r
+        )
 
-    fig3 = px.pie(
-        df3_sorted,
-        names=col_tec,
-        values=col_acc,
-        hole=0.55,
-        title="Participación de Accesos por Tecnología",
-        color_discrete_sequence=px.colors.sequential.Blues_r
-    )
+        # Mostrar SOLO nombre + porcentaje
+        fig3.update_traces(
+            textinfo='label+percent',
+            textposition='inside',
+            insidetextorientation='horizontal'
+        )
 
-    fig3.update_traces(
-        textinfo='percent',
-        textposition='inside'
-    )
+        fig3.update_layout(
+            title_x=0.5,
+            height=620,
+            legend_title="Tecnología"
+        )
 
-    fig3.update_layout(
-        title_x=0.5,
-        height=620,
-        legend_title_text="Tecnología"
-    )
-
-    st.plotly_chart(fig3, use_container_width=True)
+        st.plotly_chart(fig3, use_container_width=True)
 
 else:
     st.warning("Sin datos disponibles")
