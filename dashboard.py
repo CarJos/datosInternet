@@ -139,10 +139,7 @@ if not df3.empty:
 
     if {"accesos"}.issubset(df3.columns):
         
-        # Detectar columna de tecnología (segunda columna)
         col_tec = df3.columns[1]
-
-        # Ordenar de mayor a menor
         df3_sorted = df3.sort_values("accesos", ascending=False)
 
         fig3 = px.pie(
@@ -150,8 +147,7 @@ if not df3.empty:
             names=col_tec,
             values="accesos",
             title="Participación por Tecnología",
-            color="accesos",
-            color_continuous_scale="Blues"
+            color_discrete_sequence=px.colors.sequential.Blues_r
         )
 
         fig3.update_traces(
@@ -174,7 +170,6 @@ if not df3.empty:
 
 else:
     st.warning("Sin datos disponibles")
-
 # -------- SECCIÓN 4 --------
 st.header("Velocidad Promedio por Segmento")
 if not df4.empty:
