@@ -51,12 +51,12 @@ df1, df2, df3, df4, df5 = load_data()
 st.sidebar.title("Panel de Control")
 st.sidebar.markdown("Proyecto de Analítica de Datos")
 
-if not df1.empty and "anio" in df1.columns:
-    anio_opciones = sorted(df1["anio"].dropna().unique())
-    anio_sel = st.sidebar.selectbox("Seleccionar Año", anio_opciones)
-    df1 = df1[df1["anio"] == anio_sel]
-else:
-    st.sidebar.warning("No se encontró columna 'anio'")
+filtro = st.sidebar.selectbox(
+    "Filtrar por Departamento",
+    df1[df1.columns[1]].unique()
+)
+
+df1 = df1[df1[df1.columns[1]] == filtro]
 
 # -------------------------------------------------
 # DASHBOARD
@@ -66,59 +66,91 @@ st.markdown("Análisis de accesos a Internet por regiones, tecnologías y provee
 
 # -------- SECCIÓN 1 --------
 st.header("Accesos por Departamento")
-if not df1.empty:
-    st.dataframe(df1, use_container_width=True)
-    if len(df1.columns) >= 2:
-        fig1 = px.bar(df1, x=df1.columns[1], y="accesos", title="Accesos por Departamento")
-        st.plotly_chart(fig1, use_container_width=True)
-else:
-    st.warning("Sin datos disponibles")
+fig1 = px.bar(
+    df1.sort_values("accesos", ascending=False),
+    x="accesos",
+    y=df1.columns[1],
+    orientation="h",
+    title="📊 Accesos por Departamento",
+    color="accesos",
+    color_continuous_scale="Teal"
+)
+
+fig1.update_layout(
+    template=TEMPLATE,
+    title_x=0.3,
+    height=500
+)
+
+st.plotly_chart(fig1, use_container_width=True)
 
 # -------- SECCIÓN 2 --------
 st.header("Top Municipios con Más Accesos")
-if not df2.empty:
-    st.dataframe(df2, use_container_width=True)
-    if len(df2.columns) >= 2:
-        fig2 = px.bar(df2.head(10), x="accesos", y=df2.columns[1], orientation='h', title="Top Municipios")
-        st.plotly_chart(fig2, use_container_width=True)
-else:
-    st.warning("Sin datos disponibles")
+top_mun = df2.sort_values("accesos", ascending=False).head(10)
+
+fig2 = px.bar(
+    top_mun,
+    x="accesos",
+    y=top_mun.columns[1],
+    orientation='h',
+    text="accesos",
+    title="🏆 Top 10 Municipios"
+)
+
+fig2.update_traces(textposition="outside")
+
+fig2.update_layout(
+    template=TEMPLATE,
+    height=500
+)
+
+st.plotly_chart(fig2, use_container_width=True)
 
 # -------- SECCIÓN 3 --------
 st.header("Distribución por Tecnología")
-if not df3.empty:
-    st.dataframe(df3, use_container_width=True)
-    if len(df3.columns) >= 2:
-        fig3 = px.pie(df3, names=df3.columns[1], values="accesos", title="Participación por Tecnología")
-        st.plotly_chart(fig3, use_container_width=True)
-else:
-    st.warning("Sin datos disponibles")
+fig3 = px.pie(
+    df3,
+    names=df3.columns[1],
+    values="accesos",
+    hole=0.4,  # donut 🔥
+    title="📡 Distribución por Tecnología"
+)
+
+fig3.update_layout(template=TEMPLATE)
+
+st.plotly_chart(fig3, use_container_width=True)
 
 # -------- SECCIÓN 4 --------
 st.header("Velocidad Promedio por Segmento")
-if not df4.empty:
-    st.dataframe(df4, use_container_width=True)
-    if {"velocidad_bajada", "velocidad_subida"}.issubset(df4.columns):
-        fig4 = px.bar(
-            df4,
-            x=df4.columns[1],
-            y=["velocidad_bajada", "velocidad_subida"],
-            barmode="group",
-            title="Velocidades Promedio"
-        )
-        st.plotly_chart(fig4, use_container_width=True)
-else:
-    st.warning("Sin datos disponibles")
+fig4 = px.line(
+    df4,
+    x=df4.columns[1],
+    y=["velocidad_bajada", "velocidad_subida"],
+    markers=True,
+    title="🚀 Velocidades Promedio"
+)
+
+fig4.update_layout(template=TEMPLATE)
+
+st.plotly_chart(fig4, use_container_width=True)
 
 # -------- SECCIÓN 5 --------
 st.header("Proveedores con Más Accesos")
-if not df5.empty:
-    st.dataframe(df5, use_container_width=True)
-    if len(df5.columns) >= 2:
-        fig5 = px.bar(df5.head(10), x=df5.columns[1], y="accesos", title="Top Proveedores")
-        st.plotly_chart(fig5, use_container_width=True)
-else:
-    st.warning("Sin datos disponibles")
+top_prov = df5.sort_values("accesos", ascending=False).head(10)
+
+fig5 = px.bar(
+    top_prov,
+    x="accesos",
+    y=top_prov.columns[1],
+    orientation="h",
+    color="accesos",
+    color_continuous_scale="Viridis",
+    title="🏢 Top Proveedores"
+)
+
+fig5.update_layout(template=TEMPLATE)
+
+st.plotly_chart(fig5, use_container_width=True)
 
 # -------------------------------------------------
 # PIE
