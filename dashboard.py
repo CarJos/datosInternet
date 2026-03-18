@@ -165,25 +165,20 @@ if not df3.empty:
 
         fig3 = px.pie(
             df3_sorted,
-            names=col_tec,
+            names=col_tec,          # ← tecnología
             values="accesos",
             hole=0.55,
             title="Participación de Accesos por Tecnología",
             color_discrete_sequence=px.colors.sequential.Blues_r
         )
 
-        fig3.update_traces(
-            texttemplate='<b>%{label}</b><br>%{percent}',
-            textposition='inside',
-            insidetextorientation='horizontal'
-        )
+        # Mostrar SOLO nombre + porcentaje
+        fig3.update_traces(textinfo='percent')
 
         fig3.update_layout(
             title_x=0.5,
             height=620,
-            legend_title="Tecnología",
-            uniformtext_minsize=10,
-            uniformtext_mode='hide'
+            legend_title="Tecnología"
         )
 
         st.plotly_chart(fig3, use_container_width=True)
