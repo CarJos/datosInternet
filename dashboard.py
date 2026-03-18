@@ -50,22 +50,24 @@ df1, df2, df3, df4, df5 = load_data()
 st.sidebar.title("Panel de Control")
 st.sidebar.markdown("Proyecto de Analítica de Datos")
 
-# NUEVO FILTRO POR DEPARTAMENTO
+# FILTRO GENERAL + DEPARTAMENTO
 if not df1.empty and "departamento" in df1.columns:
-    depto_opciones = sorted(df1["departamento"].dropna().unique())
+    depto_opciones = ["Todos"] + sorted(df1["departamento"].dropna().unique())
     depto_sel = st.sidebar.selectbox("Seleccionar Departamento", depto_opciones)
-    
-    df1 = df1[df1["departamento"] == depto_sel]
 
-    # Aplicar filtro a otros datasets si tienen la columna
-    if "departamento" in df2.columns:
-        df2 = df2[df2["departamento"] == depto_sel]
-    if "departamento" in df3.columns:
-        df3 = df3[df3["departamento"] == depto_sel]
-    if "departamento" in df4.columns:
-        df4 = df4[df4["departamento"] == depto_sel]
-    if "departamento" in df5.columns:
-        df5 = df5[df5["departamento"] == depto_sel]
+    # Aplicar filtro solo si NO es "Todos"
+    if depto_sel != "Todos":
+        df1 = df1[df1["departamento"] == depto_sel]
+
+        if "departamento" in df2.columns:
+            df2 = df2[df2["departamento"] == depto_sel]
+        if "departamento" in df3.columns:
+            df3 = df3[df3["departamento"] == depto_sel]
+        if "departamento" in df4.columns:
+            df4 = df4[df4["departamento"] == depto_sel]
+        if "departamento" in df5.columns:
+            df5 = df5[df5["departamento"] == depto_sel]
+
 else:
     st.sidebar.warning("No se encontró columna 'departamento'")
 
