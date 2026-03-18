@@ -153,7 +153,7 @@ else:
     st.warning("Sin datos disponibles")
     
 # -------- SECCIÓN 3 --------
-st.header("Distribución por Tecnología (Donut)")
+st.header("Distribución por Tecnología")
 
 if not df3.empty:
     st.dataframe(df3, use_container_width=True)
@@ -163,27 +163,27 @@ if not df3.empty:
         col_tec = df3.columns[1]
         df3_sorted = df3.sort_values("accesos", ascending=False)
 
-        fig3b = px.pie(
+        fig3 = px.treemap(
             df3_sorted,
-            names=col_tec,
+            path=[col_tec],
             values="accesos",
-            hole=0.55,
-            title="Participación de Accesos por Tecnología",
-            color_discrete_sequence=px.colors.sequential.Blues_r
+            color="accesos",
+            color_continuous_scale="Blues",
+            title="Distribución de Accesos por Tecnología"
         )
 
-        fig3b.update_traces(
-            texttemplate='%{label}<br>%{percent}',
-            textposition='inside'
+        fig3.update_traces(
+            texttemplate='<b>%{label}</b><br>%{value:,.0f} accesos',
+            textposition="middle center"
         )
 
-        fig3b.update_layout(
+        fig3.update_layout(
             title_x=0.5,
             height=620,
-            legend_title="Tecnología"
+            margin=dict(t=60, l=20, r=20, b=20)
         )
 
-        st.plotly_chart(fig3b, use_container_width=True)
+        st.plotly_chart(fig3, use_container_width=True)
 
 else:
     st.warning("Sin datos disponibles")
@@ -196,16 +196,28 @@ if not df4.empty:
     if {"velocidad_bajada", "velocidad_subida"}.issubset(df4.columns):
 
         col_segmento = df4.columns[1]
-        df4_sorted = df4.sort_values("velocidad_bajada", ascending=False)
+
+        df4_long = df4.melt(
+            id_vars=[col_segmento],
+            value_vars=["velocidad_bajada", "velocidad_subida"],
+            var_name="tipo",
+            value_name="velocidad"
+        )
 
         fig4 = px.bar(
-            df4_sorted,
+            df4_long,
             x=col_segmento,
-            y=["velocidad_bajada", "velocidad_subida"],
+            y="velocidad",
+            color="tipo",
             barmode="group",
-            text_auto=True,
-            title="Comparación de Velocidades Promedio por Segmento",
+            text="velocidad",
+            title="Velocidad Promedio de Bajada vs Subida por Segmento",
             color_discrete_sequence=px.colors.sequential.Blues_r
+        )
+
+        fig4.update_traces(
+            texttemplate='%{text:.1f}',
+            textposition='outside'
         )
 
         fig4.update_layout(
@@ -214,12 +226,9 @@ if not df4.empty:
             xaxis_title="Segmento",
             yaxis_title="Velocidad (Mbps)",
             legend_title="Tipo de Velocidad",
-            xaxis_tickangle=-25,
-            bargap=0.25,
-            margin=dict(l=40, r=40, t=60, b=120)
+            xaxis_tickangle=-20,
+            bargap=0.25
         )
-
-        fig4.update_traces(texttemplate='%{value:.1f}')
 
         st.plotly_chart(fig4, use_container_width=True)
 
@@ -235,7 +244,7 @@ if not df5.empty:
     if {"accesos"}.issubset(df5.columns):
 
         col_prov = df5.columns[1]
-        df5_sorted = df5.sort_values("accesos", ascending=False).head(15)
+        df5_sorted = df5.sort_values("accesos", ascending=False).head(20)
 
         fig5 = px.treemap(
             df5_sorted,
@@ -247,8 +256,8 @@ if not df5.empty:
         )
 
         fig5.update_traces(
-            texttemplate='%{label}<br>%{value:,.0f}',
-            textposition='middle center'
+            texttemplate='<b>%{label}</b><br>%{value:,.0f}',
+            textposition="middle center"
         )
 
         fig5.update_layout(
