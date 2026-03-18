@@ -185,7 +185,10 @@ if not df3.empty:
             height=520,
             xaxis_title="Tecnología",
             yaxis_title="Número de accesos",
-            xaxis_tickangle=-30
+            xaxis_tickangle=-20,
+            bargap=0.15,      # menos espacio entre barras
+            bargroupgap=0.05, # barras más gruesas
+            margin=dict(l=40, r=40, t=60, b=120)
         )
 
         st.plotly_chart(fig3, use_container_width=True)
