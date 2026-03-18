@@ -252,7 +252,7 @@ if not df5.empty:
         )
 
         fig5.update_traces(
-            texttemplate='<b>%{label}</b><br>%{value:,.0f}',
+            texttemplate='<b>%{label}</b><br>Accesos: %{value:,.0f}',
             textposition="middle center"
         )
 
