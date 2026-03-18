@@ -116,37 +116,35 @@ st.header("Top Municipios con Más Accesos")
 if not df2.empty:
     st.dataframe(df2, use_container_width=True)
 
-    # Ordenar y tomar top 10
     df_top = df2.sort_values(by="accesos", ascending=False).head(10)
 
-    # Crear etiqueta más clara (municipio + departamento)
     if "departamento" in df_top.columns:
         df_top["label"] = df_top["municipio"] + " (" + df_top["departamento"] + ")"
     else:
         df_top["label"] = df_top["municipio"]
 
     fig2 = px.bar(
-        df_top.sort_values("accesos"),  # para que el mayor quede arriba
-        x="accesos",
-        y="label",
-        orientation="h",
+        df_top,
+        x="label",
+        y="accesos",
         text="accesos",
         title="Top 10 Municipios con Más Accesos a Internet",
         color="accesos",
-        color_continuous_scale="blues"
+        color_continuous_scale="Blues"
     )
 
-    # Mejorar formato visual
     fig2.update_traces(
-        texttemplate='%{text:,.0f}',  # formato con comas
+        texttemplate='%{text:,.0f}',
         textposition='outside'
     )
 
     fig2.update_layout(
-        yaxis_title="Municipio",
-        xaxis_title="Número de accesos",
         title_x=0.5,
-        height=500
+        height=520,
+        xaxis_title="Municipio",
+        yaxis_title="Número de accesos",
+        xaxis_tickangle=-35,
+        bargap=0.25
     )
 
     st.plotly_chart(fig2, use_container_width=True)
@@ -163,12 +161,13 @@ if not df3.empty:
     if {"accesos"}.issubset(df3.columns):
 
         col_tec = df3.columns[1]
-        df3_sorted = df3.sort_values("accesos", ascending=False)
+        df3_sorted = df3.sort_values("accesos", ascending=True)
 
         fig3 = px.bar(
             df3_sorted,
-            x=col_tec,
-            y="accesos",
+            y=col_tec,
+            x="accesos",
+            orientation="h",
             text="accesos",
             title="Accesos por Tecnología",
             color="accesos",
@@ -182,13 +181,11 @@ if not df3.empty:
 
         fig3.update_layout(
             title_x=0.5,
-            height=520,
-            xaxis_title="Tecnología",
-            yaxis_title="Número de accesos",
-            xaxis_tickangle=-20,
-            bargap=0.15,      # menos espacio entre barras
-            bargroupgap=0.05, # barras más gruesas
-            margin=dict(l=40, r=40, t=60, b=120)
+            height=600,
+            yaxis_title="Tecnología",
+            xaxis_title="Número de accesos",
+            bargap=0.2,
+            margin=dict(l=120, r=40, t=60, b=60)
         )
 
         st.plotly_chart(fig3, use_container_width=True)
