@@ -89,14 +89,48 @@ else:
 
 # -------- SECCIÓN 2 --------
 st.header("Top Municipios con Más Accesos")
+
 if not df2.empty:
     st.dataframe(df2, use_container_width=True)
-    if len(df2.columns) >= 2:
-        fig2 = px.bar(df2.head(10), x="accesos", y=df2.columns[1], orientation='h', title="Top Municipios")
-        st.plotly_chart(fig2, use_container_width=True)
+
+    # Ordenar y tomar top 10
+    df_top = df2.sort_values(by="accesos", ascending=False).head(10)
+
+    # Crear etiqueta más clara (municipio + departamento)
+    if "departamento" in df_top.columns:
+        df_top["label"] = df_top["municipio"] + " (" + df_top["departamento"] + ")"
+    else:
+        df_top["label"] = df_top["municipio"]
+
+    fig2 = px.bar(
+        df_top.sort_values("accesos"),  # para que el mayor quede arriba
+        x="accesos",
+        y="label",
+        orientation="h",
+        text="accesos",
+        title="Top 10 Municipios con Más Accesos a Internet",
+        color="accesos",
+        color_continuous_scale="blues"
+    )
+
+    # Mejorar formato visual
+    fig2.update_traces(
+        texttemplate='%{text:,.0f}',  # formato con comas
+        textposition='outside'
+    )
+
+    fig2.update_layout(
+        yaxis_title="Municipio",
+        xaxis_title="Número de accesos",
+        title_x=0.5,
+        height=500
+    )
+
+    st.plotly_chart(fig2, use_container_width=True)
+
 else:
     st.warning("Sin datos disponibles")
-
+    
 # -------- SECCIÓN 3 --------
 st.header("Distribución por Tecnología")
 if not df3.empty:
