@@ -239,7 +239,7 @@ if not df5.empty:
 
     if {"accesos"}.issubset(df5.columns):
 
-        col_prov = df5.columns[1]
+        col_prov = "proveedor"
         df5_sorted = df5.sort_values("accesos", ascending=False).head(20)
 
         fig5 = px.treemap(
